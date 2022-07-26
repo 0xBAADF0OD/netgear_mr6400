@@ -19,11 +19,11 @@ output_dir = ""
 file_count = 0
 
 def debug_log(string):
-	if DEBUG_ON:
-		print("{}{}".format(colored("[DBG] ", "white", attrs=["bold"]), string))
+    if DEBUG_ON:
+        print("{}{}".format(colored("[DBG] ", "white", attrs=["bold"]), string))
 
 def log(string):
-	print("{}{}".format(colored("[LOG] ", "green", attrs=["bold"]), string))
+    print("{}{}".format(colored("[LOG] ", "green", attrs=["bold"]), string))
 
 def xor_brute_key(data):
     best = [-1,-1, -1]
