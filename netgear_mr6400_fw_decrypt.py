@@ -18,26 +18,12 @@ sechead_len = 0x90
 output_dir = ""
 file_count = 0
 
-def debug_log(string):
-    if DEBUG_ON:
-        print("{}{}".format(colored("[DBG] ", "white", attrs=["bold"]), string))
-
-def log(string):
-    print("{}{}".format(colored("[LOG] ", "green", attrs=["bold"]), string))
-
-def xor_brute_key(data):
-    best = [-1,-1, -1]
-    for keytest in range(0,31):
-        key = xor_shift_key(keytest)
-        result = xor_decrypt_data(data, key)
-        null_count = result.count(0x00)
-        if null_count > best[2]:
-            best[0] = result
-            best[1] = keytest
-            best[2] = null_count
-        print(null_count)
-    
-    return best
+def log(string, debug=False):
+    if debug:
+        if DEBUG_ON:
+            print("{}{}".format(colored("[DBG] ", "white", attrs=["bold"]), string))
+    else:
+        print("{}{}".format(colored("[LOG] ", "green", attrs=["bold"]), string))
 
 def xor_shift_key(count):
     return xor_key[-count:]+xor_key[:-count]
@@ -52,21 +38,10 @@ def xor_decrypt_data(data, key):
             d=data_section[i]
             out.append(k^d)
         if section_count % 100 == 0:
-            debug_log("{} bytes processed".format(1024*section_count))
+            log("{} bytes processed".format(1024*section_count), True)
         if len(data_section) < 1024:
             return out
         section_count+=1
-
-def get_chunk_index(fwdata):
-    splitter = b'\x80\x40\x4C\x21\x51\x9B\xFD\xC5\xCD\xFF\x2E\xD3\x66\x0B\x8F\x6E' * 16
-    start = 0
-    chunk_index = []
-    while True:
-        ind = fwdata.find(splitter, start)
-        if ind < 0:
-            return chunk_index
-        start = ind+1
-        chunk_index.append(ind)
             
 def extract_chunks(chunks, prev_chunk_name = "", depth=0):
     global output_dir, file_count
@@ -87,25 +62,24 @@ def extract_chunks(chunks, prev_chunk_name = "", depth=0):
         #XOR decrypt the chunk body
         if chunk_body_enc:
             if (depth == 0) or (magic in chunk_body_enc):
-                #XOR Key is shifted by the pure body length (chunk - header, without the magic)
-                #We need to remember that our chunk has the magic added back onto it
+                #XOR Key is shifted by the chunk body length (chunk - header, without the magic)
+                #But the XOR process is applied to the entire chunk. We'll discard the first secheader_len bytes
                 xor_keyshift = (len(chunk_body_enc)) % 32
                 xor_key_mod = xor_shift_key(xor_keyshift)
                 log("{} body has length of {}, keyshift of {}".format(chunk_name, len(chunk_body_enc), xor_keyshift))
                 chunk_body = xor_decrypt_data(chunk, xor_key_mod)
             else:
-                log("{} body has length of {}, no XOR used".format(chunk_name, len(chunk_body_enc)))
+                log("{} body has length of {}, no need to XOR".format(chunk_name, len(chunk_body_enc)))
                 chunk_body = chunk
             chunk_body = chunk_body[sechead_len:]
             with open(os.path.join(output_dir,"{:02d}_{}_{}_body.bin".format(file_count, prev_chunk_name, chunk_name)), "wb") as f:
                 f.write(chunk_body)
             file_count += 1
             if (magic*16 in chunk_body):
-                debug_log("[!] entering a nest!, depth is {}".format(depth))
+                log("[!] entering a nest!, depth is {}".format(depth), True)
                 nested_chunks = chunk_body.split(magic*16)[1:]
                 extract_chunks(nested_chunks, chunk_name, depth+1)
         chunk_count += 1
-        
 
 def main():
     global output_dir
@@ -130,17 +104,4 @@ def main():
     extract_chunks(chunks)
         
         
-        
-    # #Initial header is 0x190h in length
-    # fwhead_enc = fwdata[:0x190]
-    
-    # fwhead = aes.decrypt(fwhead_enc)
-    # with open(os.path.join(output_dir,"fw_header_0-0x190h.bin"), "wb") as f:
-        # f.write(fwhead)
-    
-    
-    # chunk_index = {}
-
-
-
 main()
