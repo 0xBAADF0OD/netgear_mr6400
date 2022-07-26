@@ -16,6 +16,7 @@ xor_key = b'\x3D\x52\x1F\x34\x5F\x50\x28\x84\x55\x1E\x67\x0F\xB2\x57\x77\x31\x53
 fwhead_len = 0x190
 sechead_len = 0x90
 output_dir = ""
+full_file = b''
 file_count = 0
 
 def log(string, debug=False):
@@ -29,22 +30,24 @@ def xor_shift_key(count):
     return xor_key[-count:]+xor_key[:-count]
 
 def xor_decrypt_data(data, key):
+    #byte-wise XOR, processing key-length bytes of data at a time.
     out = bytearray()
     section_count = 0
+    key_length = len(key)
     while True:
-        data_section = data[section_count*1024:(section_count+1)*1024]
+        data_section = data[section_count*key_length:(section_count+1)*key_length]
         for i in range(len(data_section)):
             k=key[i % len(key)]
             d=data_section[i]
             out.append(k^d)
-        if section_count % 100 == 0:
-            log("{} bytes processed".format(1024*section_count), True)
-        if len(data_section) < 1024:
+        if section_count % 1000 == 0:
+            log("{} bytes processed".format(key_length*section_count), True)
+        if len(data_section) < key_length:
             return out
         section_count+=1
             
 def extract_chunks(chunks, prev_chunk_name = "", depth=0):
-    global output_dir, file_count
+    global output_dir, file_count, full_file
     chunk_count = 0
     for chunk in chunks:
         #AES decrypt the chunk header
@@ -79,10 +82,17 @@ def extract_chunks(chunks, prev_chunk_name = "", depth=0):
                 log("[!] entering a nest!, depth is {}".format(depth), True)
                 nested_chunks = chunk_body.split(magic*16)[1:]
                 extract_chunks(nested_chunks, chunk_name, depth+1)
+                
+        if depth == 0:
+            if chunk_count > 0:
+                full_file += b'\x00'*0x100
+            full_file += chunk_header
+            if chunk_body_enc:
+                full_file += chunk_body
         chunk_count += 1
 
 def main():
-    global output_dir
+    global output_dir, full_file
     parser = argparse.ArgumentParser()
     parser.add_argument('filename')
     args = parser.parse_args()
@@ -102,6 +112,10 @@ def main():
     #BEGIN PROCESSING INPUT FILE
     chunks = fwdata.split(magic*16)
     extract_chunks(chunks)
-        
+    
+    #Fix remaining issues with the full file
+    full_file = full_file.replace(magic, b'\x00'*0x10)
+    with open(os.path.join(output_dir,"_{}.dec".format(fname)), "wb") as f:
+        f.write(full_file)    
         
 main()
