@@ -51,8 +51,9 @@ AT!OPENLOCK=[challenge response]
 AT!ENTERCND=[CNDPW]
 AT!TELEN=1
 AT!CUSTOM="RDENABLE",1
+AT!RESET
 ```
-Then, just telnet to port 23 and you're root
+Then, just wait till reboot and telnet to port 23 and you're root. You might need to reboot twice.
 
 ---
 
@@ -63,6 +64,7 @@ AT!OPENLOCK=[challenge response]
 AT!ENTERCND=[CNDPW]
 AT!TELEN=0
 AT!CUSTOM="RDENABLE",0
+AT!RESET
 ```
 
 ---
