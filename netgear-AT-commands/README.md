@@ -84,6 +84,11 @@ AT!BAND=04,"VZW NRNSA B2/4/5/13/66 n2/5/66/77",0,101A,2,12,1002,0
 AT!RESET
 ```
 
+#### Remove some bands
+```
+AT!BAND=04,"",0
+```
+
 #### Select a band (Only necessary on the 6500, the 6400 UI allows selection)
 ```
 #Select the band in index 01, "ALL 4G ONLY" in the example above
