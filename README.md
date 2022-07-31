@@ -1,4 +1,4 @@
-# Netgear Mobile Router Firmware Decryptor
+# Netgear Mobile Router Stuff
 
 Python3 script to decrypt a Netgear Mobile Router firmware. It will generates all of the individual files, headers, and a full representation of the plaintext sierra update file.
 
