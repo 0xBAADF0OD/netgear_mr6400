@@ -8,6 +8,10 @@ Useful tool: [sierrakeygen.py](https://github.com/bkerler/edl/tree/master/edlcli
 
 ### Usual Sierra LOCK/MEP/CND commands
 ```
+#Use SDX55 for -d, even though it uses a SDX65
+#example: 
+#python3 sierrakeygen.py -d SDX55 -l AA11BB22CC33DD44
+
 #Get LOCK challenge, use -l in sierrakeygen
 AT!OPENLOCK? 
 AT!OPENLOCK=[challenge response]
