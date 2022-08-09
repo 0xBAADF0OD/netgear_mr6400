@@ -2,7 +2,7 @@
 
 Python3 script to decrypt a Netgear Mobile Router firmware. It will generates all of the individual files, headers, and a full representation of the plaintext sierra update file.
 
-Use https://github.com/jrspruitt/ubi_reader or something like it to browser UBIFS
+Use https://github.com/jrspruitt/ubi_reader or something like it to browse UBIFS
 
 #### Compatible devices:
 - M6 Pro (MR6400, MR6500)
