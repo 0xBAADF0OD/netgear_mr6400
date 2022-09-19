@@ -52,7 +52,6 @@ AT!GRESET
 ```
 AT!OPENLOCK?
 AT!OPENLOCK=[challenge response]
-AT!ENTERCND=[CNDPW]
 AT!TELEN=1
 AT!CUSTOM="RDENABLE",1
 AT!RESET
@@ -65,7 +64,6 @@ Then, just wait till reboot and telnet to port 23 and you're root. You might nee
 ```
 AT!OPENLOCK?
 AT!OPENLOCK=[challenge response]
-AT!ENTERCND=[CNDPW]
 AT!TELEN=0
 AT!CUSTOM="RDENABLE",0
 AT!RESET
