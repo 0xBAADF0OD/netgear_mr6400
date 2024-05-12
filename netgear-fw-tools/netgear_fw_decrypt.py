@@ -30,22 +30,13 @@ def xor_shift_key(count):
     return xor_key[-count:]+xor_key[:-count]
 
 def xor_decrypt_data(data, key):
-    #byte-wise XOR, processing key-length bytes of data at a time.
     out = bytearray()
-    section_count = 0
     key_length = len(key)
-    while True:
-        data_section = data[section_count*key_length:(section_count+1)*key_length]
-        for i in range(len(data_section)):
-            k=key[i % len(key)]
-            d=data_section[i]
-            out.append(k^d)
-        if section_count % 1000 == 0:
-            log("{} bytes processed".format(key_length*section_count), True)
-        if len(data_section) < key_length:
-            return out
-        section_count+=1
-            
+    for i in range(0, len(data), key_length):
+        key_bytes = key[:min(key_length, len(data) - i)]
+        out.extend(b ^ k for b, k in zip(data[i:i + len(key_bytes)], key_bytes))
+    return out
+           
 def extract_chunks(chunks, prev_chunk_name = "", depth=0):
     global output_dir, file_count, full_file
     chunk_count = 0
@@ -117,5 +108,5 @@ def main():
     full_file = full_file.replace(magic, b'\x00'*0x10)
     with open(os.path.join(output_dir,"_{}.dec".format(fname)), "wb") as f:
         f.write(full_file)    
-        
+    
 main()
